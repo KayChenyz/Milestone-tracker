@@ -108,10 +108,10 @@ SELECT [ProjectId]
   SELECT DISTINCT
   [latest_mpdate].[PROJECT_SIZE_NAME],
   CASE 
-      WHEN [FP_Status] ='Ongoing' AND  [PR_Status] ='Ongoing'AND [MP_Status] ='Ongoing' THEN  'FP_CP'           
-      WHEN [FP_Status] ='Closed' AND  [PR_Status] ='Ongoing'AND [MP_Status] ='Ongoing' THEN 'PR_CP'
-      WHEN [FP_Status] ='Closed' AND  [PR_Status] ='Closed'AND [MP_Status] ='Ongoing' THEN 'MP_CP'
-      WHEN [FP_Status] ='Closed' AND  [PR_Status] ='Closed'AND [MP_Status] ='Closed' THEN 'Finished'
+       WHEN GETDATE() BETWEEN [FP_CP_deadline] AND [PR_CP_deadline] THEN 'PR_CP'
+       WHEN GETDATE() BETWEEN [PR_CP_deadline] AND [MP_CP_deadline] THEN 'MP_CP'
+       WHEN GETDATE() < [FP_CP_deadline] THEN 'FP_CP'
+       WHEN GETDATE() > [MP_CP_deadline] THEN 'finished'
       ELSE 'error'
    END AS Upcoming_status,
   [FP_CP_deadline],
