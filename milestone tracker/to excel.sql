@@ -107,11 +107,14 @@ SELECT [ProjectId]
   
   SELECT DISTINCT
   [latest_mpdate].[PROJECT_SIZE_NAME],
-  CASE 
+  CASE    
+       WHEN [FP_CP_deadline] IS NULL THEN '--'
+       WHEN [PR_CP_deadline] IS NULL THEN '--'
+       WHEN [MP_CP_deadline] IS NULL THEN '--'
        WHEN GETDATE() BETWEEN [FP_CP_deadline] AND [PR_CP_deadline] THEN 'PR_CP'
        WHEN GETDATE() BETWEEN [PR_CP_deadline] AND [MP_CP_deadline] THEN 'MP_CP'
        WHEN GETDATE() < [FP_CP_deadline] THEN 'FP_CP'
-       WHEN GETDATE() > [MP_CP_deadline] THEN 'finished'
+       WHEN GETDATE() > [MP_CP_deadline] THEN 'Finished'
       ELSE 'error'
    END AS Upcoming_status,
   [FP_CP_deadline],
@@ -127,7 +130,7 @@ SELECT [ProjectId]
   JOIN PRclose_cp on PRclose_cp.PROJECT_SIZE_ID = latest_mpdate.PROJECT_SIZE_ID
   JOIN latest_fpdate ON latest_fpdate.[ProjectSizeId]= latest_mpdate.PROJECT_SIZE_ID
   JOIN FPclose_cp on FPclose_cp.PROJECT_SIZE_ID = latest_mpdate.PROJECT_SIZE_ID
-  WHERE MPrnk = 1 AND MRrnk2=1 AND FPrnk1=1 AND FPrnk2=1 AND PRrnk=1 AND PRrnk2=1 AND FP_CP_deadline > '2023-06-01'
+  WHERE MPrnk = 1 AND MRrnk2=1 AND FPrnk1=1 AND FPrnk2=1 AND PRrnk=1 AND PRrnk2=1 AND MP_CP_deadline > GETDATE()
   AND latest_mpdate.PROJECT_SIZE_ID not in (1166, 1109, 1122, 1124, 1125)
   /*Drop duplicated Descent T2, Tacx NEO 3M*, GPSMAP 9000_Black Box*/
   ORDER BY FP_CP_deadline
