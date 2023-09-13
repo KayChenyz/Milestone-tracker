@@ -23,7 +23,7 @@ SELECT [ProjectSizeId]
       ,[Item_Name]
       ,[Status] AS FP_Status
       ,[T_PID_CkList].[Frequency]
-      ,ISNULL(NULLIF(LEFT(UpdateUser, CHARINDEX('@', UpdateUser + '@') - 1), ''), NULL)AS fp_updater
+      ,NULLIF(LEFT(UpdateUser, CHARINDEX('@', UpdateUser + '@') - 1), '')AS fp_updater
       /*replace''to null to correspond the case-then syntax below*/
       ,RANK() OVER (PARTITION by [T_PID_CkList].[PROJECT_SIZE_ID],[Category_Name],[Item_Name]ORDER by [T_PID_CkList].[Frequency] ASC) as FPrnk2
       /*Rank checkdate to find oldest one and it's FPdate */
@@ -62,7 +62,7 @@ SELECT [ProjectSizeId]
       ,[Item_Name]
       ,[Status] AS PR_Status
       ,[T_PID_CkList].[Frequency]
-      ,ISNULL(NULLIF(LEFT(UpdateUser, CHARINDEX('@', UpdateUser + '@') - 1), ''), NULL)AS pr_updater
+      ,NULLIF(LEFT(UpdateUser, CHARINDEX('@', UpdateUser + '@') - 1), '') AS pr_updater
       /*replace''to null to correspond the case-then syntax below*/
       ,RANK() OVER (PARTITION by [T_PID_CkList].[PROJECT_SIZE_ID],[Category_Name],[Item_Name]ORDER by [T_PID_CkList].[Frequency] ASC) as PRrnk2
       /*Rank checkdate to find oldest one and it's PRdate */
@@ -100,7 +100,7 @@ SELECT [ProjectId]
       ,[Item_Name]
       ,[Status] AS MP_Status
       ,[T_PID_CkList].[Frequency]
-      ,ISNULL(NULLIF(LEFT(UpdateUser, CHARINDEX('@', UpdateUser + '@') - 1), ''), NULL)AS mp_updater
+      ,NULLIF(LEFT(UpdateUser, CHARINDEX('@', UpdateUser + '@') - 1), '')AS mp_updater
       /*replace''to null to correspond the case-then syntax below*/
       ,RANK() OVER (PARTITION by [T_PID_CkList].[PROJECT_SIZE_ID],[Category_Name],[Item_Name]ORDER by [T_PID_CkList].[Frequency] ASC) as MRrnk2
       /*Rank checkdate to find oldest one and it's MPdate */
@@ -117,8 +117,8 @@ SELECT [ProjectId]
   )
   /* Final select form six CTE above*/
   SELECT DISTINCT
-  [PROJECT_CATEGORY],
-  [latest_mpdate].[PROJECT_SIZE_NAME],
+  [PROJECT_CATEGORY] as Segement,
+  [latest_mpdate].[PROJECT_SIZE_NAME] as Project,
     CASE         
        WHEN [mp_updater] IS not NULL THEN [mp_updater]
        WHEN [pr_updater] IS not NULL AND [mp_updater] IS NULL THEN [pr_updater]
@@ -126,9 +126,7 @@ SELECT [ProjectId]
        WHEN [fp_updater] IS NULL AND [mp_updater] IS NULL AND [pr_updater] IS NULL THEN 'NULL'
       ELSE 'error'
    END AS updater,/* check if the updater haS been changed in FP PR or MP*/
-  [fp_updater],/* only for checking, this column will be deleted*/
-  [pr_updater],/* only for checking, this column will be deleted*/
-  [mp_updater],/* only for checking, this column will be deleted*/
+
   CASE    
        WHEN [FP_CP_deadline] IS NULL THEN '--'/*if the date haven't update then show--*/
        WHEN [PR_CP_deadline] IS NULL THEN '--'
@@ -141,10 +139,13 @@ SELECT [ProjectId]
    END AS Upcoming_status,/* decide the upcoming status*/
   [FP_CP_deadline],
   [FP_Status],
+  [fp_updater] AS FP_Updater,
   [PR_CP_deadline],
   [PR_Status],
+  [pr_updater]AS PR_Updater,
   [MP_CP_deadline],
-  [MP_Status]
+  [MP_Status],
+  [mp_updater]AS MP_Updater
 
   /* Drop "rnk" and "ChangeDate"*/
   FROM latest_mpdate
