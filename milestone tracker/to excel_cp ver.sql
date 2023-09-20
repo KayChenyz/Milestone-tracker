@@ -22,6 +22,7 @@ SELECT [ProjectSizeId]
     SELECT
     [ProjectSizeId]
     ,CAST([Current_Date]as date)as FP_realKick
+    ,RANK() OVER (PARTITION by ProjectSizeId,PROJECT_SIZE_ID,PROJECT_SIZE_NAME ORDER by [Current_Date] ASC) as FPrnk3
   FROM [PR_WEB2].[dbo].[T_GT_ProjectSchedule]
   left join [PR_WEB2].[dbo].[T_GT_TaskBaseInfo]
   on [T_GT_ProjectSchedule].[TASK_ID]=[T_GT_TaskBaseInfo].[TASK_ID]
@@ -74,6 +75,7 @@ SELECT [ProjectSizeId]
     SELECT
     [ProjectSizeId]
     ,CAST([Current_Date]as date)as PR_realKick
+    ,RANK() OVER (PARTITION by ProjectSizeId,PROJECT_SIZE_ID,PROJECT_SIZE_NAME ORDER by [Current_Date] ASC) as PRrnk3
   FROM [PR_WEB2].[dbo].[T_GT_ProjectSchedule]
   left join [PR_WEB2].[dbo].[T_GT_TaskBaseInfo]
   on [T_GT_ProjectSchedule].[TASK_ID]=[T_GT_TaskBaseInfo].[TASK_ID]
@@ -193,7 +195,7 @@ SELECT [ProjectId]
   JOIN FPKick_cp on FPKick_cp.PROJECT_SIZE_ID = latest_mpdate.PROJECT_SIZE_ID
   JOIN FPKick_real on FPKick_real.ProjectSizeId = latest_mpdate.PROJECT_SIZE_ID
   JOIN PRKick_real on PRKick_real.ProjectSizeId= latest_mpdate.PROJECT_SIZE_ID
-  WHERE MPrnk = 1 AND MRrnk2=1 AND FPrnk1=1 AND FPrnk2=1 AND PRrnk=1 AND PRrnk2=1 
+  WHERE MPrnk = 1 AND MRrnk2=1 AND FPrnk1=1 AND FPrnk2=1 AND FPrnk3=1 AND PRrnk=1 AND PRrnk2=1 AND PRrnk3=1
   /*only show the first FP,PR and MP*/
   AND MP_CP_deadline > DATEADD(MONTH, -1, GETDATE())
   /*only show the project in tje future (one month is for buffer)*/
